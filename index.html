@@ -12,7 +12,8 @@
     .background { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
     .background__orbit {
       position: absolute; top: 50%; left: 50%;
-      width: min(120vmax, 1600px); aspect-ratio: 1;
+      /* Grow continuously from half-size on mobile to full-size on desktop. */
+      width: clamp(min(60vmax, 800px), calc(min(60vmax, 800px) + 200vw - 1200px), min(120vmax, 1600px)); aspect-ratio: 1;
       translate: -50% -50%; animation: orbit 60s linear infinite;
     }
     .background__image {
@@ -38,10 +39,13 @@
       animation: crt-roll 14s linear infinite;
       will-change: transform;
     }
-    main { min-height: 100svh; display: grid; place-items: center; padding: 2rem; text-align: center; }
+    main { min-height: 100svh; display: grid; place-items: center; padding: clamp(.5rem, calc(6vw - 28px), 2rem); text-align: center; }
     h1 {
       margin: 0;
-      font-size: clamp(1.5rem, 6.5vw, 6rem);
+      /* Blend the mobile and desktop sizes across 600–1000px viewports. */
+      font-size: clamp(clamp(1.5rem, 6.5vw, 6rem), calc(97.5px - 3.25vw), clamp(3rem, 13vw, 12rem));
+      overflow-wrap: anywhere;
+      min-width: 0;
       font-weight: 600;
       letter-spacing: .015em;
       color: #f5f6fa;
