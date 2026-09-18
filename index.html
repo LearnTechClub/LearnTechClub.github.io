@@ -32,6 +32,7 @@
         repeating-linear-gradient(90deg, rgba(255,65,90,.035) 0 1px, rgba(80,255,150,.025) 1px 2px, rgba(70,120,255,.04) 2px 3px);
     }
     .background__crt::before {
+      display: none; /* Enable to restore the rolling light band. */
       content: ""; position: absolute; inset: -100% 0 0;
       background: linear-gradient(transparent 40%, rgba(170,210,255,.045) 48%, rgba(170,210,255,.075) 50%, transparent 60%);
       animation: crt-roll 14s linear infinite;
