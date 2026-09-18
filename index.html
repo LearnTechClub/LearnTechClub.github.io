@@ -26,14 +26,43 @@
       background: radial-gradient(ellipse at center, transparent 15%, rgba(8,11,16,.5) 70%, var(--background) 100%);
     }
     main { min-height: 100svh; display: grid; place-items: center; padding: 2rem; text-align: center; }
-    h1 { margin: 0; font-size: clamp(2rem, 7vw, 6rem); font-weight: 600; letter-spacing: -.055em; text-shadow: 0 2px 30px #080b10; }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.5rem, 6.5vw, 6rem);
+      font-weight: 600;
+      letter-spacing: .015em;
+      color: #f5f6fa;
+      filter: drop-shadow(0 0 8px #8040ff) drop-shadow(0 0 28px rgba(128, 32, 255, .75));
+      animation: title-glow 12s linear infinite;
+    }
+    @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+      h1 {
+        background-image: linear-gradient(90deg, #65b5ff, #b388ff, #ff75c3, #ffc66b, #68efad, #61dcff, #65b5ff);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: title-colors 12s ease-in-out infinite alternate, title-glow 12s linear infinite;
+      }
+    }
+    @keyframes title-colors {
+      from { background-position: 0% 50%; }
+      to { background-position: 100% 50%; }
+    }
+    @keyframes title-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px #8040ff) drop-shadow(0 0 28px rgba(128, 32, 255, .75)); }
+      25% { filter: drop-shadow(0 0 8px #ff2090) drop-shadow(0 0 28px rgba(255, 0, 112, .75)); }
+      50% { filter: drop-shadow(0 0 8px #ff9010) drop-shadow(0 0 28px rgba(255, 112, 0, .75)); }
+      75% { filter: drop-shadow(0 0 8px #00dfba) drop-shadow(0 0 28px rgba(0, 224, 176, .75)); }
+      87.5% { filter: drop-shadow(0 0 8px #008cff) drop-shadow(0 0 28px rgba(0, 112, 255, .75)); }
+    }
     @keyframes orbit {
       from { transform: rotate(0deg) translateX(3vmin) rotate(0deg); }
       to { transform: rotate(360deg) translateX(3vmin) rotate(-360deg); }
     }
     @keyframes turn { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) {
-      .background__orbit, .background__image { animation: none; }
+      .background__orbit, .background__image, h1 { animation: none; }
     }
   </style>
 </head>
