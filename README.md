@@ -1,1 +1,1 @@
-# LearnTechClub.github.io
+# LearnTech.Club
