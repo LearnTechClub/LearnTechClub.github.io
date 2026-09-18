@@ -1,1 +1,48 @@
-Hello
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b10">
+  <title>LearnTech.Club</title>
+  <style>
+    :root { color-scheme: dark; --background: #080b10; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; background: var(--background); color: #f5f6fa; font-family: system-ui, sans-serif; isolation: isolate; }
+    .background { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .background__orbit {
+      position: absolute; top: 50%; left: 50%;
+      width: min(120vmax, 1600px); aspect-ratio: 1;
+      translate: -50% -50%; animation: orbit 60s linear infinite;
+    }
+    .background__image {
+      width: 100%; height: 100%; object-fit: cover; opacity: .65; filter: blur(2px);
+      -webkit-mask-image: radial-gradient(circle, #000 18%, rgba(0,0,0,.85) 32%, transparent 67%);
+      mask-image: radial-gradient(circle, #000 18%, rgba(0,0,0,.85) 32%, transparent 67%);
+      animation: turn 180s linear infinite;
+    }
+    .background::after {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 15%, rgba(8,11,16,.5) 70%, var(--background) 100%);
+    }
+    main { min-height: 100svh; display: grid; place-items: center; padding: 2rem; text-align: center; }
+    h1 { margin: 0; font-size: clamp(2rem, 7vw, 6rem); font-weight: 600; letter-spacing: -.055em; text-shadow: 0 2px 30px #080b10; }
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(3vmin) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(3vmin) rotate(-360deg); }
+    }
+    @keyframes turn { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .background__orbit, .background__image { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="background" aria-hidden="true">
+    <div class="background__orbit">
+      <img class="background__image" src="../assets/enlight.jpg" alt="" fetchpriority="high">
+    </div>
+  </div>
+  <main><h1>LearnTech.Club</h1></main>
+</body>
+</html>
