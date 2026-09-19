@@ -113,11 +113,9 @@
       }
     }
     @keyframes title-glitter {
-      /* Repeat the same burst twice, reducing only the dark interval. */
-      0%, 8%, 38%, 58%, 88%, 100% { opacity: 0; }
-      18%, 68% { opacity: 1; }
-      26%, 76% { opacity: .15; }
-      30%, 80% { opacity: .7; }
+      /* One gentle rise and a longer fade per burst, with short quiet gaps. */
+      0%, 4%, 46%, 54%, 96%, 100% { opacity: 0; }
+      21%, 71% { opacity: 1; }
     }
     @keyframes title-colors {
       from { background-position: var(--sand-x, 0px) var(--sand-y, 0px), 0% 50%; }
