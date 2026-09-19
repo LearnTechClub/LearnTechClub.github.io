@@ -55,12 +55,15 @@
       font-weight: 500;
       letter-spacing: .015em;
       color: #f5f6fa;
+    }
+    .title-face {
+      display: block; position: relative;
       filter: drop-shadow(0 0 8px #8040ff) drop-shadow(0 0 28px rgba(128, 32, 255, .75));
       animation: title-glow 12s linear infinite;
     }
     .title-sand, .title-glitter { display: none; }
     @supports ((background-clip: text) or (-webkit-background-clip: text)) {
-      h1 {
+      .title-face {
         background-image: linear-gradient(90deg, #65b5ff, #b388ff, #ff75c3, #ffc66b, #68efad, #61dcff, #65b5ff);
         background-size: 200% 100%;
         -webkit-background-clip: text;
@@ -122,6 +125,20 @@
         animation-delay: -3.7s;
       }
     }
+    /* Keep SDR SVGs above as the fallback. HDR PNGs contain 1000-nit PQ
+       whites; no-limit permits that luminance, it does not create it.
+       The glow filter belongs only to .title-face, never the HDR layers. */
+    @media (dynamic-range: high) {
+      @supports (dynamic-range-limit: no-limit) {
+        .title-glitter::before, .title-glitter::after {
+          background-image: url("../assets/glitter-hdr.png");
+          dynamic-range-limit: no-limit;
+        }
+        .title-glitter--alternate::before, .title-glitter--alternate::after {
+          background-image: url("../assets/glitter-hdr-long.png");
+        }
+      }
+    }
     @keyframes title-glitter {
       /* One gentle rise and a longer fade per burst, with short quiet gaps. */
       0%, 4%, 46%, 54%, 96%, 100% { opacity: 0; }
@@ -158,7 +175,7 @@
       to { transform: translateY(100%); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .background__orbit, .background__image, h1, .title-sand { animation: none; }
+      .background__orbit, .background__image, .title-face, .title-sand { animation: none; }
       .background__crt::before { animation: none; display: none; }
       .title-glitter::before, .title-glitter::after { animation: none; opacity: .3; }
     }
@@ -171,6 +188,6 @@
     </div>
     <div class="background__crt"></div>
   </div>
-  <main><h1>LearnTech.Club<span class="title-sand" aria-hidden="true">LearnTech.Club</span><span class="title-glitter" data-text="LearnTech.Club" aria-hidden="true"></span><span class="title-glitter title-glitter--alternate" data-text="LearnTech.Club" aria-hidden="true"></span></h1></main>
+  <main><h1><span class="title-face">LearnTech.Club<span class="title-sand" aria-hidden="true">LearnTech.Club</span></span><span class="title-glitter" data-text="LearnTech.Club" aria-hidden="true"></span><span class="title-glitter title-glitter--alternate" data-text="LearnTech.Club" aria-hidden="true"></span></h1></main>
 </body>
 </html>
