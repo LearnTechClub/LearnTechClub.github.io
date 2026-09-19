@@ -58,17 +58,31 @@
     }
     @supports ((background-clip: text) or (-webkit-background-clip: text)) {
       h1 {
-        background-image: linear-gradient(90deg, #65b5ff, #b388ff, #ff75c3, #ffc66b, #68efad, #61dcff, #65b5ff);
-        background-size: 200% 100%;
+        /* Shift the grain independently of the smooth color gradient. */
+        background-image:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='sand' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='1.8' intercept='-.4'/%3E%3CfeFuncG type='linear' slope='1.8' intercept='-.4'/%3E%3CfeFuncB type='linear' slope='1.8' intercept='-.4'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cpath fill='%23808080' filter='url(%23sand)' d='M0 0h160v160H0z'/%3E%3C/svg%3E"),
+          linear-gradient(90deg, #65b5ff, #b388ff, #ff75c3, #ffc66b, #68efad, #61dcff, #65b5ff);
+        background-size: 160px 160px, 200% 100%;
+        background-blend-mode: soft-light;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-        animation: title-colors 12s ease-in-out infinite alternate, title-glow 12s linear infinite;
+        animation: title-colors 12s ease-in-out infinite alternate, title-glow 12s linear infinite, title-sand 1.6s steps(1, end) infinite;
       }
     }
     @keyframes title-colors {
-      from { background-position: 0% 50%; }
-      to { background-position: 100% 50%; }
+      from { background-position: var(--sand-x, 0px) var(--sand-y, 0px), 0% 50%; }
+      to { background-position: var(--sand-x, 0px) var(--sand-y, 0px), 100% 50%; }
+    }
+    @keyframes title-sand {
+      0%, 100% { --sand-x: 0px; --sand-y: 0px; }
+      12.5% { --sand-x: -17px; --sand-y: 11px; }
+      25% { --sand-x: 23px; --sand-y: -19px; }
+      37.5% { --sand-x: -31px; --sand-y: -7px; }
+      50% { --sand-x: 13px; --sand-y: 29px; }
+      62.5% { --sand-x: -11px; --sand-y: -23px; }
+      75% { --sand-x: 37px; --sand-y: 17px; }
+      87.5% { --sand-x: 7px; --sand-y: -37px; }
     }
     @keyframes title-glow {
       0%, 100% { filter: drop-shadow(0 0 8px #8040ff) drop-shadow(0 0 28px rgba(128, 32, 255, .75)); }
