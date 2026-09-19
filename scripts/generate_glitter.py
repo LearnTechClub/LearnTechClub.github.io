@@ -16,8 +16,8 @@ BEAM_NITS = 1000
 CORE_POWER = 4.0
 CORE_RADIUS = .9
 FALLOFF_POWER = 2.0
-THICKNESS_POWER = 2.2  # Curved shoulders taper into fine rays instead of triangles.
-BEAM_HALF_WIDTH = .9
+THICKNESS_POWER = 2.0
+BEAM_BASE_WIDTH = .065  # Fine diffraction streak, with no solid polygon edges.
 WIDTH, HEIGHT = 113 * SCALE, 79 * SCALE
 
 def chunk(kind, data):
@@ -37,16 +37,18 @@ def beam_nits(radius, tip_radius):
     return beam + (PEAK_NITS - BEAM_NITS) * core
 
 def beam_width(distance, tip_radius):
-    return BEAM_HALF_WIDTH * max(0, 1 - distance / tip_radius) ** THICKNESS_POWER
+    # Broad luminous shoulder near the source, quickly narrowing to a hairline.
+    return BEAM_BASE_WIDTH + .65 / (1 + distance / .45) ** THICKNESS_POWER
 
 def beam_alpha(along, across, tip_radius, pixel_width):
     along, across = abs(along), abs(across)
-    if along >= tip_radius:
-        return 0
     width = beam_width(along, tip_radius)
-    # Approximate pixel coverage at both edges, including subpixel ray tips.
-    return max(0, min(1, (.5 * pixel_width + width - across) / pixel_width,
-                      2 * width / pixel_width))
+    # Integrate a Gaussian across the pixel so narrow rays remain smooth.
+    edge = .5 * pixel_width
+    coverage = width * math.sqrt(math.pi) / (2 * pixel_width) * (
+        math.erf((across + edge) / width) - math.erf((across - edge) / width))
+    # Soft longitudinal fade, avoiding a visible endpoint.
+    return coverage * math.exp(-3 * (along / tip_radius) ** 4)
 
 def generate(long_rays):
     length = 2 if long_rays else 1
@@ -62,12 +64,18 @@ def generate(long_rays):
                 dx, dy = ((px+.5)/SCALE-cx)/size, ((py+.5)/SCALE-cy)/size
                 x, y = c*dx+s*dy, -s*dx+c*dy
                 r = math.hypot(x,y)
-                a = max(0, .7*(1-r/4))
+                if r > 2 * 7 * length:
+                    continue
+                # Smooth bloom and a luminous core; no hard circular dot.
+                halo = .12 * math.exp(-(r / 1.8) ** 1.3)
                 pixel_width = 1 / (SCALE * size)
-                core = max(0, min(1, .5 + (.9 - r) / pixel_width))
-                a = max(a, core,
-                        beam_alpha(y, x, 7 * length, pixel_width),
-                        beam_alpha(x, y, 5 * length, pixel_width))
+                core = math.exp(-(r / .6) ** 2)
+                vertical = beam_alpha(y, x, 7 * length, pixel_width)
+                horizontal = beam_alpha(x, y, 5 * length, pixel_width)
+                # Faint short diagonal scattering around the central bloom.
+                diagonal = .035 * math.exp(-(r / 1.5) ** 2) * (
+                    math.exp(-((x-y) / .28) ** 2) + math.exp(-((x+y) / .28) ** 2))
+                a = 1 - (1-core) * (1-halo) * (1-vertical) * (1-horizontal) * (1-diagonal)
                 if a > 0:
                     tip_radius = (7 if abs(y) >= abs(x) else 5) * length
                     nits = beam_nits(r, tip_radius)

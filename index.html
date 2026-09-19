@@ -98,12 +98,14 @@
         -webkit-background-clip: text;
         background-clip: text;
         opacity: 0;
-        animation: title-glitter 3.7s ease-in-out infinite;
+        animation: title-glitter 3.7s ease-in-out infinite,
+                   glitter-position 14.8s steps(1, end) infinite;
       }
       .title-glitter::after {
+        --glitter-x: 47px; --glitter-y: 31px;
         background-position: 47px 31px;
         background-size: 137px 97px;
-        animation-duration: 4.9s;
+        animation-duration: 4.9s, 19.6s;
         animation-delay: -2.1s;
       }
     }
@@ -113,15 +115,17 @@
         background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22113%22%20height%3D%2279%22%20viewBox%3D%220%200%20113%2079%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22halo%22%3E%3Cstop%20stop-color%3D%22white%22%20stop-opacity%3D%22.7%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22white%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3Cg%20id%3D%22flare%22%3E%3Ccircle%20r%3D%224%22%20fill%3D%22url%28%23halo%29%22%2F%3E%3Cpath%20d%3D%22M0-14%20.8-1%2010%200%20.8%201%200%2014-.8%201-10%200-.8-1Z%22%20fill%3D%22white%22%2F%3E%3Ccircle%20r%3D%22.9%22%20fill%3D%22white%22%2F%3E%3C%2Fg%3E%3C%2Fdefs%3E%3Cuse%20href%3D%22%23flare%22%20transform%3D%22translate%2811%2017%29%20rotate%2832%29%20scale%28.65%29%22%2F%3E%3Cuse%20href%3D%22%23flare%22%20transform%3D%22translate%2839%2043%29%20rotate%2832%29%22%2F%3E%3Cuse%20href%3D%22%23flare%22%20transform%3D%22translate%2871%2029%29%20rotate%2832%29%20scale%28.5%29%22%2F%3E%3Cuse%20href%3D%22%23flare%22%20transform%3D%22translate%2897%2061%29%20rotate%2832%29%20scale%28.8%29%22%2F%3E%3C%2Fsvg%3E");
       }
       .title-glitter--alternate::before {
+        --glitter-x: 19px; --glitter-y: 53px;
         background-position: 19px 53px;
         background-size: 149px 103px;
-        animation-duration: 4.3s;
+        animation-duration: 4.3s, 17.2s;
         animation-delay: -1.3s;
       }
       .title-glitter--alternate::after {
+        --glitter-x: 83px; --glitter-y: 7px;
         background-position: 83px 7px;
         background-size: 163px 89px;
-        animation-duration: 5.9s;
+        animation-duration: 5.9s, 23.6s;
         animation-delay: -3.7s;
       }
     }
@@ -138,6 +142,18 @@
           background-image: url("../assets/glitter-hdr-long.png");
         }
       }
+    }
+    /* Eight irregular positions per four shimmer cycles. Each discrete jump
+       lands at zero opacity; different layer periods obscure the repeat. */
+    @keyframes glitter-position {
+      0%, 100% { background-position: calc(var(--glitter-x, 0px) + 0px) calc(var(--glitter-y, 0px) + 0px); }
+      12.5% { background-position: calc(var(--glitter-x, 0px) + 37px) calc(var(--glitter-y, 0px) + -23px); }
+      25% { background-position: calc(var(--glitter-x, 0px) + -19px) calc(var(--glitter-y, 0px) + 41px); }
+      37.5% { background-position: calc(var(--glitter-x, 0px) + 67px) calc(var(--glitter-y, 0px) + 13px); }
+      50% { background-position: calc(var(--glitter-x, 0px) + -43px) calc(var(--glitter-y, 0px) + -31px); }
+      62.5% { background-position: calc(var(--glitter-x, 0px) + 11px) calc(var(--glitter-y, 0px) + 59px); }
+      75% { background-position: calc(var(--glitter-x, 0px) + 79px) calc(var(--glitter-y, 0px) + -47px); }
+      87.5% { background-position: calc(var(--glitter-x, 0px) + -61px) calc(var(--glitter-y, 0px) + 7px); }
     }
     @keyframes title-glitter {
       /* One gentle rise and a longer fade per burst, with short quiet gaps. */
