@@ -1,6 +1,6 @@
 """Generate transparent BT.2100 PQ glitter; Python standard library only.
 
-Run from any directory; writes to the sibling assets repository. RGB encodes up to 1000 cd/m² with a gentle power-law beam falloff; alpha shapes the reflections.
+Run from any directory; writes to the sibling assets repository. RGB encodes up to 2000 cd/m² with a pronounced power-law beam falloff; alpha shapes the reflections.
 cICP 9/16/0/1 signals BT.2020, PQ, RGB, full range (PNG Third Edition).
 Do not strip color metadata or convert these files to ordinary sRGB PNGs.
 """
@@ -11,8 +11,11 @@ import zlib
 
 OUT = Path(__file__).resolve().parents[2] / 'assets'
 SCALE = 8  # 904 × 632 pixels; CSS keeps the same apparent sparkle size.
-PEAK_NITS = 1000
-FALLOFF_POWER = 0.4
+PEAK_NITS = 2000
+BEAM_NITS = 1000
+CORE_POWER = 4.0
+CORE_RADIUS = .9
+FALLOFF_POWER = 2.0
 THICKNESS_POWER = 2.2  # Curved shoulders taper into fine rays instead of triangles.
 BEAM_HALF_WIDTH = .9
 WIDTH, HEIGHT = 113 * SCALE, 79 * SCALE
@@ -26,10 +29,12 @@ def pq(nits):
     return ((3424 / 4096 + 2413 / 128 * y) / (1 + 2392 / 128 * y)) ** m2
 
 def beam_nits(radius, tip_radius):
-    # Preserve the bright core, then fall gently to ~76% at each ray tip.
+    # A sharp central peak joins the beam continuously at the core edge.
     # Apply the power law in physical luminance before PQ encoding.
-    distance = max(0, min(1, (radius - .9) / (tip_radius - .9)))
-    return PEAK_NITS * (1 + distance) ** -FALLOFF_POWER
+    distance = max(0, min(1, (radius - CORE_RADIUS) / (tip_radius - CORE_RADIUS)))
+    beam = BEAM_NITS * (1 + distance) ** -FALLOFF_POWER
+    core = max(0, 1 - radius / CORE_RADIUS) ** CORE_POWER
+    return beam + (PEAK_NITS - BEAM_NITS) * core
 
 def beam_width(distance, tip_radius):
     return BEAM_HALF_WIDTH * max(0, 1 - distance / tip_radius) ** THICKNESS_POWER
