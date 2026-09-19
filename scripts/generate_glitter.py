@@ -1,6 +1,6 @@
 """Generate transparent BT.2100 PQ glitter; Python standard library only.
 
-Run from any directory; writes to the sibling assets repository. RGB encodes 1000 cd/m²; alpha shapes the reflections.
+Run from any directory; writes to the sibling assets repository. RGB encodes up to 1000 cd/m² with a gentle power-law beam falloff; alpha shapes the reflections.
 cICP 9/16/0/1 signals BT.2020, PQ, RGB, full range (PNG Third Edition).
 Do not strip color metadata or convert these files to ordinary sRGB PNGs.
 """
@@ -10,7 +10,11 @@ import struct
 import zlib
 
 OUT = Path(__file__).resolve().parents[2] / 'assets'
-SCALE = 4
+SCALE = 8  # 904 × 632 pixels; CSS keeps the same apparent sparkle size.
+PEAK_NITS = 1000
+FALLOFF_POWER = 0.4
+THICKNESS_POWER = 2.2  # Curved shoulders taper into fine rays instead of triangles.
+BEAM_HALF_WIDTH = .9
 WIDTH, HEIGHT = 113 * SCALE, 79 * SCALE
 
 def chunk(kind, data):
@@ -21,37 +25,51 @@ def pq(nits):
     y = (nits / 10000) ** m1
     return ((3424 / 4096 + 2413 / 128 * y) / (1 + 2392 / 128 * y)) ** m2
 
-def inside(x, y, vertices):
-    result = False
-    prev = vertices[-1]
-    for point in vertices:
-        ax, ay = prev
-        bx, by = point
-        if (ay > y) != (by > y) and x < (bx - ax) * (y - ay) / (by - ay) + ax:
-            result = not result
-        prev = point
-    return result
+def beam_nits(radius, tip_radius):
+    # Preserve the bright core, then fall gently to ~76% at each ray tip.
+    # Apply the power law in physical luminance before PQ encoding.
+    distance = max(0, min(1, (radius - .9) / (tip_radius - .9)))
+    return PEAK_NITS * (1 + distance) ** -FALLOFF_POWER
+
+def beam_width(distance, tip_radius):
+    return BEAM_HALF_WIDTH * max(0, 1 - distance / tip_radius) ** THICKNESS_POWER
+
+def beam_alpha(along, across, tip_radius, pixel_width):
+    along, across = abs(along), abs(across)
+    if along >= tip_radius:
+        return 0
+    width = beam_width(along, tip_radius)
+    # Approximate pixel coverage at both edges, including subpixel ray tips.
+    return max(0, min(1, (.5 * pixel_width + width - across) / pixel_width,
+                      2 * width / pixel_width))
 
 def generate(long_rays):
     length = 2 if long_rays else 1
-    polygon = [(0,-7*length),(.8,-1),(5*length,0),(.8,1),(0,7*length),(-.8,1),(-5*length,0),(-.8,-1)]
     c, s = math.cos(math.radians(32)), math.sin(math.radians(32))
-    white = round(pq(1000) * 65535)
-    rgb = struct.pack('>HHH', white, white, white)
+    white = round(pq(PEAK_NITS) * 65535)
     raw = bytearray()
     for py in range(HEIGHT):
         raw.append(0)
         for px in range(WIDTH):
             alpha = 0
+            luminance = 0
             for cx, cy, size in [(11,17,.65),(39,43,1),(71,29,.5),(97,61,.8)]:
                 dx, dy = ((px+.5)/SCALE-cx)/size, ((py+.5)/SCALE-cy)/size
                 x, y = c*dx+s*dy, -s*dx+c*dy
                 r = math.hypot(x,y)
                 a = max(0, .7*(1-r/4))
-                if r <= .9 or inside(x,y,polygon):
-                    a = 1
-                alpha = 1-(1-alpha)*(1-a)
-            raw.extend(rgb + struct.pack('>H', round(alpha*65535)))
+                pixel_width = 1 / (SCALE * size)
+                core = max(0, min(1, .5 + (.9 - r) / pixel_width))
+                a = max(a, core,
+                        beam_alpha(y, x, 7 * length, pixel_width),
+                        beam_alpha(x, y, 5 * length, pixel_width))
+                if a > 0:
+                    tip_radius = (7 if abs(y) >= abs(x) else 5) * length
+                    nits = beam_nits(r, tip_radius)
+                    luminance = nits * a + luminance * (1 - a)
+                    alpha = a + alpha * (1 - a)
+            code = round(pq(luminance / alpha) * 65535) if alpha else 0
+            raw.extend(struct.pack('>HHHH', code, code, code, round(alpha*65535)))
     png = b'\x89PNG\r\n\x1a\n'
     png += chunk(b'IHDR', struct.pack('>IIBBBBB',WIDTH,HEIGHT,16,6,0,0,0))
     png += chunk(b'cICP', bytes([9,16,0,1]))
