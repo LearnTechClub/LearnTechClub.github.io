@@ -44,6 +44,7 @@
     }
     main { min-height: 100svh; display: grid; place-items: center; padding: clamp(.5rem, calc(6vw - 28px), 2rem); text-align: center; }
     h1 {
+      position: relative;
       margin: 0;
       font-family: "Lobster", system-ui, sans-serif;
       /* Blend the mobile and desktop sizes across 600–1000px viewports. */
@@ -56,6 +57,7 @@
       filter: drop-shadow(0 0 8px #8040ff) drop-shadow(0 0 28px rgba(128, 32, 255, .75));
       animation: title-glow 12s linear infinite;
     }
+    .title-glitter { display: none; }
     @supports ((background-clip: text) or (-webkit-background-clip: text)) {
       h1 {
         /* Shift the grain independently of the smooth color gradient. */
@@ -69,6 +71,52 @@
         color: transparent;
         animation: title-colors 12s ease-in-out infinite alternate, title-glow 12s linear infinite, title-sand 1.6s steps(1, end) infinite;
       }
+    }
+    /* Two glitter layers, each with independently timed groups of reflections. */
+    @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+      .title-glitter { display: block; position: absolute; inset: 0; pointer-events: none; }
+      .title-glitter::before, .title-glitter::after {
+        content: attr(data-text);
+        position: absolute; inset: 0;
+        color: transparent;
+        background-image:
+          radial-gradient(circle at 11px 17px, #fff 0 .7px, #fff9 1px, transparent 2px),
+          radial-gradient(circle at 39px 43px, #fff 0 1px, #fff8 1.4px, transparent 3px),
+          radial-gradient(circle at 71px 29px, #fff 0 .6px, transparent 1.8px),
+          radial-gradient(circle at 97px 61px, #fff 0 .8px, #fff6 1.3px, transparent 2.5px);
+        background-size: 113px 79px;
+        -webkit-background-clip: text;
+        background-clip: text;
+        opacity: 0;
+        animation: title-glitter 3.7s ease-in-out infinite;
+      }
+      .title-glitter::after {
+        background-position: 47px 31px;
+        background-size: 137px 97px;
+        animation-duration: 4.9s;
+        animation-delay: -2.1s;
+      }
+    }
+    @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+      .title-glitter--alternate::before {
+        background-position: 19px 53px;
+        background-size: 149px 103px;
+        animation-duration: 4.3s;
+        animation-delay: -1.3s;
+      }
+      .title-glitter--alternate::after {
+        background-position: 83px 7px;
+        background-size: 163px 89px;
+        animation-duration: 5.9s;
+        animation-delay: -3.7s;
+      }
+    }
+    @keyframes title-glitter {
+      /* Repeat the same burst twice, reducing only the dark interval. */
+      0%, 8%, 38%, 58%, 88%, 100% { opacity: 0; }
+      18%, 68% { opacity: 1; }
+      26%, 76% { opacity: .15; }
+      30%, 80% { opacity: .7; }
     }
     @keyframes title-colors {
       from { background-position: var(--sand-x, 0px) var(--sand-y, 0px), 0% 50%; }
@@ -103,6 +151,7 @@
     @media (prefers-reduced-motion: reduce) {
       .background__orbit, .background__image, h1 { animation: none; }
       .background__crt::before { animation: none; display: none; }
+      .title-glitter::before, .title-glitter::after { animation: none; opacity: .3; }
     }
   </style>
 </head>
@@ -113,6 +162,6 @@
     </div>
     <div class="background__crt"></div>
   </div>
-  <main><h1>LearnTech.Club</h1></main>
+  <main><h1>LearnTech.Club<span class="title-glitter" data-text="LearnTech.Club" aria-hidden="true"></span><span class="title-glitter title-glitter--alternate" data-text="LearnTech.Club" aria-hidden="true"></span></h1></main>
 </body>
 </html>
